@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multilingual Hour Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .calculator {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 300px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 0;
+        }
+        .input-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        input, select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 0.5rem;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 1rem;
+            text-align: center;
+            font-weight: bold;
+        }
+        .toggle, .mode-toggle, .lang-toggle {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .toggle label, .mode-toggle label, .lang-toggle label {
+            margin-right: 1rem;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="lang-toggle">
+            <label>
+                <input type="radio" name="lang" value="en" checked> English
+            </label>
+            <label>
+                <input type="radio" name="lang" value="fr"> Français
+            </label>
+        </div>
+        <h1 id="title">Hour Calculator</h1>
+        <div class="mode-toggle">
+            <label>
+                <input type="radio" name="mode" value="duration" checked> <span id="durationModeLabel">Duration Mode</span>
+            </label>
+            <label>
+                <input type="radio" name="mode" value="endTime"> <span id="endTimeModeLabel">End Time Mode</span>
+            </label>
+        </div>
+        <div class="toggle">
+            <label>
+                <input type="radio" name="timeFormat" value="24h" checked> 24h
+            </label>
+            <label>
+                <input type="radio" name="timeFormat" value="12h"> 12h
+            </label>
+        </div>
+        <div id="durationMode" class="tab-content active">
+            <div class="input-group">
+                <label for="startTime" id="startTimeLabel">Start Time</label>
+                <input type="time" id="startTime" required>
+            </div>
+            <div class="input-group">
+                <label for="endTime" id="endTimeLabel">End Time</label>
+                <input type="time" id="endTime" required>
+            </div>
+            <div class="input-group">
+                <label for="breakTime" id="breakTimeLabel">Break Time (minutes)</label>
+                <input type="number" id="breakTime" min="0" value="0">
+            </div>
+            <button onclick="calculateHours()" id="calculateDurationBtn">Calculate Duration</button>
+        </div>
+        <div id="endTimeMode" class="tab-content">
+            <div class="input-group">
+                <label for="startTimeEnd" id="startTimeEndLabel">Start Time</label>
+                <input type="time" id="startTimeEnd" required>
+            </div>
+            <div class="input-group">
+                <label for="hoursToWork" id="hoursToWorkLabel">Hours to Work</label>
+                <input type="number" id="hoursToWork" min="0" step="0.5" required>
+            </div>
+            <div class="input-group">
+                <label for="breakTimeEnd" id="breakTimeEndLabel">Break Time (minutes)</label>
+                <input type="number" id="breakTimeEnd" min="0" value="0">
+            </div>
+            <button onclick="calculateEndTime()" id="calculateEndTimeBtn">Calculate End Time</button>
+        </div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        let timeFormat = '24h';
+        let currentLang = 'en';
+
+        const translations = {
+            en: {
+                title: 'Hour Calculator',
+                durationMode: 'Duration Mode',
+                endTimeMode: 'End Time Mode',
+                startTime: 'Start Time',
+                endTime: 'End Time',
+                breakTime: 'Break Time (minutes)',
+                calculateDuration: 'Calculate Duration',
+                hoursToWork: 'Hours to Work',
+                calculateEndTime: 'Calculate End Time',
+                timeWorked: 'Time worked',
+                to: 'to',
+                minBreak: 'min break',
+                start: 'Start',
+                work: 'Work',
+                break: 'Break'
+            },
+            fr: {
+                title: 'Calculateur d\'Heures',
+                durationMode: 'Mode Durée',
+                endTimeMode: 'Mode Heure de Fin',
+                startTime: 'Heure de Début',
+                endTime: 'Heure de Fin',
+                breakTime: 'Temps de Pause (minutes)',
+                calculateDuration: 'Calculer la Durée',
+                hoursToWork: 'Heures à Travailler',
+                calculateEndTime: 'Calculer l\'Heure de Fin',
+                timeWorked: 'Temps travaillé',
+                to: 'à',
+                minBreak: 'min de pause',
+                start: 'Début',
+                work: 'Travail',
+                break: 'Pause'
+            }
+        };
+
+        function updateLanguage() {
+            currentLang = document.querySelector('input[name="lang"]:checked').value;
+            document.getElementById('title').textContent = translations[currentLang].title;
+            document.getElementById('durationModeLabel').textContent = translations[currentLang].durationMode;
+            document.getElementById('endTimeModeLabel').textContent = translations[currentLang].endTimeMode;
+            document.getElementById('startTimeLabel').textContent = translations[currentLang].startTime;
+            document.getElementById('endTimeLabel').textContent = translations[currentLang].endTime;
+            document.getElementById('breakTimeLabel').textContent = translations[currentLang].breakTime;
+            document.getElementById('calculateDurationBtn').textContent = translations[currentLang].calculateDuration;
+            document.getElementById('startTimeEndLabel').textContent = translations[currentLang].startTime;
+            document.getElementById('hoursToWorkLabel').textContent = translations[currentLang].hoursToWork;
+            document.getElementById('breakTimeEndLabel').textContent = translations[currentLang].breakTime;
+            document.getElementById('calculateEndTimeBtn').textContent = translations[currentLang].calculateEndTime;
+        }
+
+        function updateTimeFormat() {
+            timeFormat = document.querySelector('input[name="timeFormat"]:checked').value;
+            updateTimeInputs();
+        }
+
+        function formatTime(timeString) {
+            if (!timeString) return '';
+            
+            const [hours, minutes] = timeString.split(':');
+            const date = new Date(2000, 0, 1, hours, minutes);
+
+            if (timeFormat === '12h') {
+                return date.toLocaleTimeString(currentLang === 'fr' ? 'fr-FR' : 'en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+            } else {
+                return date.toTimeString().slice(0, 5);
+            }
+        }
+
+        function parseTime(timeString) {
+            if (!timeString) return '';
+
+            if (timeFormat === '12h') {
+                const [time, period] = timeString.split(' ');
+                let [hours, minutes] = time.split(':');
+                hours = parseInt(hours);
+                if (period === 'PM' && hours !== 12) hours += 12;
+                if (period === 'AM' && hours === 12) hours = 0;
+                return `${hours.toString().padStart(2, '0')}:${minutes}`;
+            } else {
+                return timeString;
+            }
+        }
+
+        function updateTimeInputs() {
+            const timeInputs = document.querySelectorAll('input[type="time"]');
+            timeInputs.forEach(input => {
+                if (input.value) {
+                    const parsedTime = parseTime(input.value);
+                    input.value = parsedTime;
+                }
+            });
+        }
+
+        function setupTimeInput(inputId) {
+            const input = document.getElementById(inputId);
+            input.addEventListener('change', function() {
+                this.value = parseTime(this.value);
+            });
+        }
+
+        function calculateHours() {
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            const breakTime = parseInt(document.getElementById('breakTime').value) || 0;
+
+            if (!startTime || !endTime) {
+                alert(currentLang === 'fr' ? 'Veuillez saisir les heures de début et de fin.' : 'Please enter both start and end times.');
+                return;
+            }
+
+            let start = new Date(`2000-01-01T${startTime}`);
+            let end = new Date(`2000-01-01T${endTime}`);
+
+            if (end <= start) {
+                end.setDate(end.getDate() + 1);
+            }
+
+            const diffMs = end - start - (breakTime * 60 * 1000);
+            const diffHours = diffMs / (1000 * 60 * 60);
+
+            const hours = Math.floor(diffHours);
+            const minutes = Math.round((diffHours - hours) * 60);
+
+            const resultText = `${translations[currentLang].timeWorked}: ${hours}h ${minutes}min<br>
+                                (${formatTime(startTime)} ${translations[currentLang].to} ${formatTime(endTime)}, ${breakTime} ${translations[currentLang].minBreak})`;
+
+            document.getElementById('result').innerHTML = resultText;
+        }
+
+        function calculateEndTime() {
+            const startTime = document.getElementById('startTimeEnd').value;
+            const hoursToWork = parseFloat(document.getElementById('hoursToWork').value);
+            const breakTime = parseInt(document.getElementById('breakTimeEnd').value) || 0;
+
+            if (!startTime || isNaN(hoursToWork)) {
+                alert(currentLang === 'fr' ? 'Veuillez saisir l\'heure de début et les heures à travailler.' : 'Please enter start time and hours to work.');
+                return;
+            }
+
+            let start = new Date(`2000-01-01T${startTime}`);
+            let end = new Date(start.getTime() + (hoursToWork * 60 * 60 * 1000) + (breakTime * 60 * 1000));
+
+            const endTimeString = end.toTimeString().slice(0, 5);
+
+            const resultText = `${translations[currentLang].endTime}: ${formatTime(endTimeString)}<br>
+                                (${translations[currentLang].start}: ${formatTime(startTime)}, ${translations[currentLang].work}: ${hoursToWork}h, ${translations[currentLang].break}: ${breakTime} min)`;
+
+            document.getElementById('result').innerHTML = resultText;
+        }
+
+        function switchMode() {
+            const mode = document.querySelector('input[name="mode"]:checked').value;
+            document.getElementById('durationMode').classList.toggle('active', mode === 'duration');
+            document.getElementById('endTimeMode').classList.toggle('active', mode === 'endTime');
+            document.getElementById('result').innerHTML = '';
+        }
+
+        // Set up event listeners
+        document.querySelectorAll('input[name="timeFormat"]').forEach(radio => {
+            radio.addEventListener('change', updateTimeFormat);
+        });
+
+        document.querySelectorAll('input[name="mode"]').forEach(radio => {
+            radio.addEventListener('change', switchMode);
+        });
+
+        document.querySelectorAll('input[name="lang"]').forEach(radio => {
+            radio.addEventListener('change', updateLanguage);
+        });
+
+        setupTimeInput('startTime');
+        setupTimeInput('endTime');
+        setupTimeInput('startTimeEnd');
+
+        // Initialize
+        updateLanguage();
+        updateTimeInputs();
+    </script>
+</body>
+</html>
