@@ -1,6 +1,6 @@
 # Hour Calculator
 <p align="center">
-![Static Badge](https://img.shields.io/badge/hosted_on-vercel-vercel?logo=vercel&link=https%3A%2F%2Fhour-calculator.vercel.app%2F)
+<img src="https://img.shields.io/badge/hosted_on-vercel-vercel?logo=vercel" alt="badge-hosted-vercel"/>
 </p>
 
 Simple app code in Go with 2 modes in French English.
