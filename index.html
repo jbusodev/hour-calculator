@@ -8,6 +8,7 @@
         body {
             font-family: Arial, sans-serif;
             display: flex;
+	    flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
@@ -72,10 +73,17 @@
         .tab-content.active {
             display: block;
         }
+	.nav-links {
+	    display: flex;
+    	    justify-content: space-around;
+    	    width: 300px;
+	    max-width: 100%;
+    	    padding: 1rem;
+	}
     </style>
 </head>
 <body>
-    <a href="https://github.com/jbusodev/hour-calculator">Github</a><a href="https://jbusodev.github.io">Portfolio</a>
+    <nav class="nav-links"><a href="https://github.com/jbusodev/hour-calculator">Github</a><a href="https://jbusodev.github.io">Portfolio</a></nav>
     <div class="calculator">
         <div class="lang-toggle">
             <label>
