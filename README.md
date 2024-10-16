@@ -3,7 +3,7 @@
 <img src="https://img.shields.io/badge/hosted_on-vercel-vercel?logo=vercel" alt="badge-hosted-vercel"/>
 </p>
 
-Simple app code in Go with 2 modes in French English.
+Simple app code in with 2 modes in French English.
 
 ## Duration
 
